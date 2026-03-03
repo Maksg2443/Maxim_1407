@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'time = super_Maxim_study_pkg.time:main',
         ],
     },
 )
