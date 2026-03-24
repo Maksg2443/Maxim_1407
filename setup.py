@@ -25,6 +25,9 @@ setup(
     entry_points={
         'console_scripts': [
             'time = super_Maxim_study_pkg.time:main',
+            'even_number_publisher = super_Maxim_study_pkg.even_number_publisher:main',
+            'overflow_listener = super_Maxim_study_pkg.overflow_listener:main',
+
         ],
     },
 )
