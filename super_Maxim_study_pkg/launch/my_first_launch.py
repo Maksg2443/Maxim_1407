@@ -13,7 +13,7 @@ def generate_launch_description():
             output='screen',
         ),
         Node(
-            package='krotov',
+            package='Maxim_1407',
             executable='overflow_listener',
             name='overflow_listener',
             output='screen',

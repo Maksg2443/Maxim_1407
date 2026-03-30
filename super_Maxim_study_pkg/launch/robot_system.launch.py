@@ -7,7 +7,7 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    package_share_dir = get_package_share_directory('krotov')
+    package_share_dir = get_package_share_directory('Maxim_1407')
 
     # --- 1. ОБЪЯВЛЯЕМ АРГУМЕНТ 'mode' ---
     # Этот аргумент можно будет передать из командной строки
@@ -75,7 +75,7 @@ def generate_launch_description():
     is_slow = PythonExpression(['"', mode, '" == "slow"'])
 
     node_fast = Node(
-        package='krotov',
+        package='Maxim_1407',
         executable='even_pub',
         name='even_pub',
         output='screen',
@@ -84,7 +84,7 @@ def generate_launch_description():
     )
 
     node_slow = Node(
-        package='krotov',
+        package='Maxim_1407',
         executable='even_pub',
         name='even_pub',
         output='screen',
@@ -94,7 +94,7 @@ def generate_launch_description():
 
     # Узел слушателя всегда запускается
     listener_node = Node(
-        package='krotov',
+        package='Maxim_1407',
         executable='overflow_listener',
         name='overflow_listener',
         output='screen',
