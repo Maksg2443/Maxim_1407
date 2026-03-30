@@ -4,58 +4,61 @@ from rclpy.node import Node
 from std_msgs.msg import Int32
 
 class EvenNumberPublisher(Node):
-
     def __init__(self):
-        super().__init__('even_pub')
+        super().__init__('even_pub') # Имя узла
 
-        # основной публикатор
-        self.publisher = self.create_publisher(Int32, 'even_numbers', 10)
+        # --- ОБЪЯВЛЯЕМ ПАРАМЕТРЫ (как в методичке) ---
+        self.declare_parameter('publish_frequency', 10.0) # Значение по умолчанию
+        self.declare_parameter('overflow_threshold', 100)
+        self.declare_parameter('topic_name', '/even_numbers')
 
-        # публикатор переполнения
+        # --- ЧИТАЕМ ЗНАЧЕНИЯ ПАРАМЕТРОВ ---
+        self.freq = self.get_parameter('publish_frequency').value
+        self.threshold = self.get_parameter('overflow_threshold').value
+        self.topic = self.get_parameter('topic_name').value
+
+        # Логируем, какие параметры загружены (для проверки)
+        self.get_logger().info(f'Параметры: частота={self.freq} Гц, порог={self.threshold}, топик="{self.topic}"')
+
+        # --- ИЗДАТЕЛИ ---
+        self.even_publisher = self.create_publisher(Int32, self.topic, 10)
         self.overflow_publisher = self.create_publisher(Int32, '/overflow', 10)
 
-        # 10 Гц
-        self.timer = self.create_timer(0.1, self.timer_callback)
+        # --- СОСТОЯНИЕ ---
+        self.counter = 0
 
-        self.current_number = 0
+        # --- ТАЙМЕР (используем параметр self.freq) ---
+        timer_period = 1.0 / self.freq
+        self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.get_logger().info("Узел even_pub запущен!")
+        self.get_logger().info("✅ Узел even_pub запущен и готов к работе.")
 
     def timer_callback(self):
+        # ... (ваш код публикации и проверки переполнения БЕЗ ИЗМЕНЕНИЙ) ...
         msg = Int32()
-        msg.data = self.current_number
+        msg.data = self.counter
+        self.even_publisher.publish(msg)
+        self.get_logger().info(f'📤 Чётное: {msg.data}')
 
-        # публикуем обычное число
-        self.publisher.publish(msg)
-        self.get_logger().info(f"Публикую: {msg.data}")
-
-        # увеличиваем
-        self.current_number += 2
-
-        # проверка переполнения
-        if self.current_number >= 100:
+        if self.counter >= self.threshold: # Используем параметр self.threshold
             overflow_msg = Int32()
-            overflow_msg.data = self.current_number
-
+            overflow_msg.data = self.counter
             self.overflow_publisher.publish(overflow_msg)
-            self.get_logger().warn(f"Переполнение! Отправлено: {overflow_msg.data}")
+            self.get_logger().warn(f'❗ ПЕРЕПОЛНЕНИЕ! Сброс. Отправлено: {overflow_msg.data}')
+            self.counter = 0
+        else:
+            self.counter += 2
 
-            # сброс
-            self.current_number = 0
-
-
-def main():
-    rclpy.init()
+def main(args=None):
+    rclpy.init(args=args)
     node = EvenNumberPublisher()
-
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        pass
+        node.get_logger().info("🛑 Узел остановлен")
     finally:
         node.destroy_node()
         rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
